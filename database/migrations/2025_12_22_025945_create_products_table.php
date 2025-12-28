@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
             $table->string('sku')->unique();
             $table->string('barcode')->nullable()->index();
             $table->string('name')->index();
@@ -23,6 +22,7 @@ return new class extends Migration
             $table->decimal('selling_price', 12, 2);
             $table->integer('reorder_level')->default(0);
             $table->boolean('is_active')->default(true);
+            $table->unsignedBigInteger('product_image_id')->nullable();
             $table->timestamps();
         });
     }

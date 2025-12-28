@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
             $table->string('name');
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->text('address')->nullable();
             $table->decimal('credit_limit', 12, 2)->default(0);
             $table->decimal('opening_balance', 12, 2)->default(0);
+            $table->unsignedBigInteger('profile_image_id')->nullable();
             $table->timestamps();
         });
     }

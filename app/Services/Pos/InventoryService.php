@@ -1,5 +1,7 @@
 <?php
-
+ 
+namespace App\Services\Pos;
+use Exception;
 use App\Models\Product;
 use Illuminate\Support\Str;
 use App\Models\ProductBatch;

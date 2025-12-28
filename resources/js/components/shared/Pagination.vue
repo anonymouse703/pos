@@ -26,7 +26,6 @@ const props = defineProps({
   }
 });
 
-// Filter numbered pages (remove Previous/Next or HTML entities « »)
 const pagesList = computed(() =>
   props.meta?.links?.filter(
     link =>
@@ -37,7 +36,6 @@ const pagesList = computed(() =>
   ) ?? []
 );
 
-// Previous / Next buttons
 const prevPage = computed(() =>
   props.meta?.links?.find(
     link => link.label.includes('Previous') || link.label.includes('«')
@@ -53,7 +51,6 @@ const nextPage = computed(() =>
 const currentPage = computed(() => props.meta?.current_page ?? 1)
 const numPages = computed(() => props.meta?.last_page ?? 1)
 
-// Navigate via Inertia preserving filters
 const redirectToUrl = (url: string | null) => {
   if (url) {
     router.visit(url, { data: props.query, preserveState: true })
@@ -64,7 +61,6 @@ const redirectToUrl = (url: string | null) => {
 <template>
   <div class="flex flex-col items-center mt-6 space-y-2">
     <div class="flex space-x-2">
-      <!-- Previous Button -->
       <button
         v-if="prevPage"
         @click="redirectToUrl(prevPage.url)"
@@ -73,7 +69,6 @@ const redirectToUrl = (url: string | null) => {
         <ChevronLeft class="w-4 h-4 inline" />
       </button>
 
-      <!-- Numbered Pages -->
       <button
         v-for="(page, index) in pagesList"
         :key="index"
@@ -88,7 +83,6 @@ const redirectToUrl = (url: string | null) => {
         {{ page.label }}
       </button>
 
-      <!-- Next Button -->
       <button
         v-if="nextPage"
         @click="redirectToUrl(nextPage.url)"
@@ -103,5 +97,5 @@ const redirectToUrl = (url: string | null) => {
 </template>
 
 <style scoped>
-/* Optional: hover effects or spacing tweaks */
+  
 </style>

@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('purchases', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
             $table->foreignId('supplier_id')->constrained();
             $table->string('invoice_no');
             $table->decimal('subtotal', 12, 2);

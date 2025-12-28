@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use Exception;
+use Carbon\Carbon;
 use Inertia\Inertia;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Category\StoreRequest;
+use App\Http\Requests\Category\UpdateRequest;
 use App\Http\Resources\Admin\CategoryResource;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
 
@@ -16,9 +18,26 @@ class CategoryController extends Controller
     public function __construct(protected CategoryRepositoryInterface $categoryRepository)
     {}
 
-    public function index()
+    public function index(Request $request)
     { 
-        $categories = $this->categoryRepository->paginate();
+         $search = $request->input('search');
+        
+        $startDate = $request->input('start_date');
+        $endDate   = $request->input('end_date');
+
+        if ($startDate) {
+            $startDate = Carbon::parse($startDate)->startOfDay(); 
+        }
+
+        if ($endDate) {
+            $endDate = Carbon::parse($endDate)->endOfDay(); 
+        }
+
+        $categories = $this->categoryRepository
+            ->filterByKeyword($search)
+            ->filterByDate($startDate, $endDate)
+            ->orderBy('published_at', 'desc')
+            ->paginate(12);
 
         return Inertia::render('categories/Index', [
             'categories' => CategoryResource::collection($categories),
@@ -58,7 +77,7 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function update(StoreRequest $request, Category $category)
+    public function update(UpdateRequest $request, Category $category)
     {
         $payload = $request->validated();
 
@@ -93,4 +112,19 @@ class CategoryController extends Controller
                 'message' => __('Category successfully deleted.'),
             ]);
     }
+
+    public function toggleStatus(Category $category)
+    {
+        $category->update([
+            'is_active' => ! $category->is_active,
+        ]);
+
+         return redirect()
+            ->route('categories.index')
+            ->with('flash', [
+                'type' => 'success', 
+                'message' => __('Category status updated.'), 
+            ]);
+    }
+
 }

@@ -21,6 +21,7 @@ class CategoryResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'is_active' => $this->is_active,
+            'created_at' => $this->created_at,
 
             // RELATIONSHIPS
             // 'article' => new ArticleResource($this->whenLoaded('article')),

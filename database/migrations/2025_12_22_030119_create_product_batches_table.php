@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('product_batches', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
             $table->foreignId('product_id')->constrained();
             $table->foreignId('supplier_id')->nullable()->constrained();
             $table->string('batch_number')->nullable();

@@ -6,9 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
+    return Inertia::render('auth/Login');
 })->name('home');
 
 Route::get('dashboard', function () {
@@ -17,6 +15,12 @@ Route::get('dashboard', function () {
 
 Route::middleware('auth', 'verified')->group(function () {  
     Route::resource('categories', Admin\CategoryController::class);
+    Route::controller(Admin\CategoryController::class)->group(function () {
+        Route::put('categories/{category}/toggle-status', 'toggleStatus')
+            ->name('categories.toggle-status');
+    });
+
+    Route::resource('customers', Admin\CustomerController::class);
 });
 
 require __DIR__.'/settings.php';

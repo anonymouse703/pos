@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('accounts_receivables', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
             $table->foreignId('customer_id')->constrained();
             $table->foreignId('sale_id')->constrained();
             $table->decimal('amount', 12, 2);

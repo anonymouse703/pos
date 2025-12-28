@@ -1,5 +1,8 @@
 <?php
 
+namespace App\Services\Pos;
+use Exception;
+use App\Services\Pos\InventoryService;
 use App\Models\Sale;
 use App\Models\Product;
 use App\Models\SaleItem;
