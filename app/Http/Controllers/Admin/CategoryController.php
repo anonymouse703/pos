@@ -37,7 +37,7 @@ class CategoryController extends Controller
             ->filterByKeyword($search)
             ->filterByDate($startDate, $endDate)
             ->orderBy('published_at', 'desc')
-            ->paginate(12);
+            ->paginate(10);
 
         return Inertia::render('categories/Index', [
             'categories' => CategoryResource::collection($categories),

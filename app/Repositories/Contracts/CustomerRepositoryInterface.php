@@ -11,4 +11,6 @@ use App\Models\Customer;
 interface CustomerRepositoryInterface extends RepositoryInterface
 {
 	//define set of methods that CustomerRepositoryInterface Repository must implement
+	public function filterByKeyword(?string $keyword = null): self;
+	public function filterByDate($startDate, $endDate) :self;
 }

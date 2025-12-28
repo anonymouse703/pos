@@ -4,23 +4,26 @@ import Button from '@/components/ui/button/Button.vue';
 import DataTable from '@/components/shared/DataTable.vue';
 import Pagination from '@/components/shared/Pagination.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Search, Filter, RefreshCcw } from 'lucide-vue-next';
-import CategoryActions from './partials/Action.vue';
+import CustomerActions from './partials/Action.vue';
 
-interface Category {
+interface Customer {
   id: number;
   name: string;
-  slug: string;
-  description?: string;
+  phone: string;
+  email: string;
+  address: string;
+  credit_limit: string;
+  opening_balance: string;
   created_at: string;
-  is_active: boolean;
 }
 
 const props = defineProps<{
-  categories: {
-    data: Category[];
+  customers: {
+    data: Customer[];
     meta?: {
       current_page: number;
       last_page: number;
@@ -32,15 +35,17 @@ const props = defineProps<{
 
 /* Breadcrumbs */
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Categories', href: '/categories' },
+  { title: 'Customers', href: dashboard().url },
 ];
 
 /* Table columns */
 const columns = [
   { key: 'name', label: 'Name', width: '200px' },
-  { key: 'slug', label: 'Slug', width: '150px' },
-  { key: 'description', label: 'Description' },
-  { key: 'is_active', label: 'Status', width: '120px' },
+  { key: 'phone', label: 'Phone', width: '150px' },
+  { key: 'email', label: 'Email', width: '200px' },
+  { key: 'address', label: 'Address', width: '250px' },
+  { key: 'credit_limit', label: 'Credit Limit', width: '120px' },
+  { key: 'opening_balance', label: 'Opening Balance', width: '130px' },
   { key: 'created_at', label: 'Created', width: '150px' },
 ];
 
@@ -53,9 +58,9 @@ const showFilterDropdown = ref(false);
 const hasDateFilter = computed(() => !!startDate.value || !!endDate.value);
 
 /* Fetch */
-const fetchCategories = () => {
+const fetchCustomers = () => {
   router.get(
-    '/categories',
+    '/customers',
     {
       search: searchQuery.value,
       start_date: startDate.value,
@@ -70,24 +75,24 @@ const fetchCategories = () => {
 const resetDateFilter = () => {
   startDate.value = '';
   endDate.value = '';
-  fetchCategories();
+  fetchCustomers();
 };
 
 /* Auto fetch when search cleared */
 watch(searchQuery, (value) => {
-  if (value === '') fetchCategories();
+  if (value === '') fetchCustomers();
 });
 
 /* Pagination */
 const paginationMeta = computed(() => ({
-  current_page: props.categories.meta?.current_page ?? 1,
-  last_page: props.categories.meta?.last_page ?? 1,
-  links: props.categories.meta?.links ?? [],
+  current_page: props.customers.meta?.current_page ?? 1,
+  last_page: props.customers.meta?.last_page ?? 1,
+  links: props.customers.meta?.links ?? [],
 }));
 </script>
 
 <template>
-  <Head title="Categories" />
+  <Head title="Customers" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex flex-col gap-4 p-4">
@@ -95,13 +100,13 @@ const paginationMeta = computed(() => ({
       <!-- Header -->
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-2xl font-bold">Categories</h1>
-          <p class="text-sm text-gray-500">Manage your product categories</p>
+          <h1 class="text-2xl font-bold">Customers</h1>
+          <p class="text-sm text-gray-500">Manage your customers</p>
         </div>
 
-        <Link href="/categories/create">
+        <Link href="/customers/create">
           <Button class="bg-blue-600 hover:bg-blue-500 text-white">
-            Create Category
+            Create Customer
           </Button>
         </Link>
       </div>
@@ -114,8 +119,8 @@ const paginationMeta = computed(() => ({
           <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             v-model="searchQuery"
-            @keyup.enter="fetchCategories"
-            placeholder="Search categories..."
+            @keyup.enter="fetchCustomers"
+            placeholder="Search customers..."
             class="w-full pl-10 pr-4 py-2 border rounded-lg"
           />
         </div>
@@ -142,7 +147,7 @@ const paginationMeta = computed(() => ({
 
             <div class="flex gap-2">
               <button
-                @click="fetchCategories"
+                @click="fetchCustomers"
                 class="flex-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg py-2"
               >
                 Apply
@@ -161,18 +166,9 @@ const paginationMeta = computed(() => ({
       </div>
 
       <!-- DataTable -->
-      <DataTable :columns="columns" :data="props.categories.data">
+      <DataTable :columns="columns" :data="props.customers.data">
         <template #row-actions="{ item }">
-          <CategoryActions :item="item" />
-        </template>
-
-        <template #cell-is_active="{ item }">
-          <span
-            class="px-2 py-1 rounded text-xs"
-            :class="item.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
-          >
-            {{ item.is_active ? 'Active' : 'Inactive' }}
-          </span>
+          <CustomerActions :item="item" />
         </template>
 
         <template #cell-created_at="{ item }">
@@ -182,7 +178,7 @@ const paginationMeta = computed(() => ({
         <template #footer>
           <div class="flex justify-between w-full">
             <p class="text-sm">
-              Showing {{ props.categories.data.length }} of {{ props.categories.meta?.total ?? 0 }}
+              Showing {{ props.customers.data.length }} of {{ props.customers.meta?.total ?? 0 }}
             </p>
             <Pagination :meta="paginationMeta" />
           </div>

@@ -13,7 +13,7 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
         parent::__construct(app(Category::class));
     }
 
-     public function filterByKeyword(?string $keyword = null): self
+    public function filterByKeyword(?string $keyword = null): self
     {
         return $this->filter(static function (Builder $builder) use($keyword){
             $builder->when($keyword, fn($q) =>

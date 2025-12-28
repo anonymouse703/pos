@@ -6,7 +6,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin;
 
 Route::get('/', function () {
-    return Inertia::render('auth/Login');
+    return Inertia::render('auth/Login', [
+        'canResetPassword' => Route::has('password.request'), 
+        'canRegister' => Route::has('register'),             
+        'status' => session('status') ?? null,
+    ]);
 })->name('home');
 
 Route::get('dashboard', function () {
