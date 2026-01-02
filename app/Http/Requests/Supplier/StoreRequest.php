@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Customer;
+namespace App\Http\Requests\Supplier;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -23,12 +23,12 @@ class StoreRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'contact_person' => 'nullable|string|max:255',
             'phone' => 'required|string|max:20',
-            'email' => 'required|email|unique:customers',
+            'email' => 'required|email|unique:suppliers,email',
             'address' => 'nullable|string',
-            'credit_limit' => 'nullable|numeric|min:0',
+            'terms_days' => 'nullable|numeric|min:0',
             'opening_balance' => 'nullable|numeric',
-            'profile_image_id' => 'nullable|integer|exists:files,id',
         ];
     }
 }

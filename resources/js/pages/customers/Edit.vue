@@ -1,51 +1,75 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { Head, useForm, Link } from '@inertiajs/vue3';
+import { ArrowLeft, Loader2, Upload, User, X } from 'lucide-vue-next';
+import AppLayout from '@/layouts/AppLayout.vue';
 import Input from '@/components/ui/input/Input.vue';
 import Label from '@/components/ui/label/Label.vue';
 import Button from '@/components/ui/button/Button.vue';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head, useForm, Link } from '@inertiajs/vue3';
-import { ArrowLeft, Loader2, Upload, User, X } from 'lucide-vue-next';
 
+const props = defineProps<{
+  customer: {
+    data: {
+        id: number;
+        name: string;
+        phone: string;
+        email: string;
+        address: string;
+        credit_limit: number | null;
+        opening_balance: number | null;
+        profile_photo: {
+            url: string;
+            type: string;
+        } | null;
+    }
+  }
+}>();
+
+// Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Customers', href: '/customers' },
-    { title: 'Create', href: dashboard().url },
+    { title: 'Edit', href: `/customers/${props.customer.data.id}/edit` },
 ];
 
+// Form typing
 interface CustomerForm {
-    name: string;
-    phone: string;
-    email: string;
-    address: string;
-    credit_limit: string;
-    opening_balance: string;
-    profile_image: File | null;
+    name: string
+    phone: string
+    email: string
+    address: string
+    credit_limit: number | ''
+    opening_balance: number | ''
+    profile_image: File | null
+    remove_profile_image?: boolean
 }
 
+
+// Use Inertia form with pre-filled data
 const form = useForm<CustomerForm>({
-    name: '',
-    phone: '',
-    email: '',
-    address: '',
-    credit_limit: '',
-    opening_balance: '',
+    name: props.customer.data.name,
+    phone: props.customer.data.phone,
+    email: props.customer.data.email,
+    address: props.customer.data.address,
+    credit_limit: props.customer.data.credit_limit ?? '',
+    opening_balance: props.customer.data.opening_balance ?? '',
     profile_image: null,
-});
+    remove_profile_image: false,
+})
 
 // Profile image preview
-const profilePreview = ref<string | null>(null);
+const profilePreview = ref<string | null>(props.customer.data.profile_photo?.url || null);
 const fileInputRef = ref<HTMLInputElement | null>(null);
 
+// Handle file selection
 const handleFileChange = (event: Event) => {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
 
     if (file) {
         form.profile_image = file;
+        form.remove_profile_image = false;
 
-        // Create preview
         const reader = new FileReader();
         reader.onload = (e) => {
             profilePreview.value = e.target?.result as string;
@@ -54,29 +78,32 @@ const handleFileChange = (event: Event) => {
     }
 };
 
+// Remove image
 const removeImage = () => {
     form.profile_image = null;
     profilePreview.value = null;
+    form.remove_profile_image = true;
+
     if (fileInputRef.value) {
         fileInputRef.value.value = '';
     }
 };
 
+// Trigger file input
 const triggerFileInput = () => {
     fileInputRef.value?.click();
 };
 
+// Submit form
 const submit = () => {
-    // Transform data before sending
     form.transform((data) => ({
         ...data,
-        credit_limit: data.credit_limit ? parseFloat(data.credit_limit) : null,
-        opening_balance: data.opening_balance ? parseFloat(data.opening_balance) : null,
-    })).post('/customers', {
+        credit_limit: data.credit_limit ? parseFloat(data.credit_limit.toString()) : null,
+        opening_balance: data.opening_balance ? parseFloat(data.opening_balance.toString()) : null,
+    }))
+    .put(`/customers/${props.customer.data.id}`, {
         onSuccess: () => {
-            console.log('Customer created successfully!');
-            form.reset();
-            profilePreview.value = null;
+            console.log('Customer updated successfully!');
         },
         onError: (errors) => {
             console.log('Validation errors:', errors);
@@ -86,20 +113,18 @@ const submit = () => {
 </script>
 
 <template>
-
-    <Head title="Create Customer" />
+    <Head title="Edit Customer" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
             <!-- Header -->
             <div class="flex items-center gap-4">
-                <Link href="/categories" class="text-gray-600 hover:text-gray-900 transition-colors">
+                <Link href="/customers" class="text-gray-600 hover:text-gray-900 transition-colors">
                     <ArrowLeft class="h-5 w-5" />
                 </Link>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Create New Customer</h1>
-                    <p class="text-sm text-gray-500 mt-1 dark:text-white">Add a new customer to your database
-                    </p>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Edit Customer</h1>
+                    <p class="text-sm text-gray-500 mt-1 dark:text-white">Update customer details</p>
                 </div>
             </div>
 
@@ -107,20 +132,17 @@ const submit = () => {
             <div class="bg-gray-100 rounded-lg border border-gray-200 shadow-sm w-full max-w-5xl mx-auto">
                 <form @submit.prevent="submit" class="p-6">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <!-- Left Side - Profile Image Upload -->
+                        <!-- Left Side - Profile Image -->
                         <div class="lg:col-span-1">
                             <div class="space-y-4">
                                 <Label class="text-sm font-medium text-gray-900 dark:text-gray-500">
                                     Profile Picture
                                 </Label>
 
-                                <!-- Image Upload Area -->
                                 <div class="flex flex-col items-center space-y-4">
-                                    <!-- Preview or Placeholder -->
+                                    <!-- Image Preview -->
                                     <div class="relative w-48 h-48">
-                                        <!-- Circle -->
-                                        <div
-                                            class="w-full h-full rounded-full border-4 border-gray-200 dark:border-gray-300 overflow-hidden bg-gray-100 dark:bg-gray-200">
+                                        <div class="w-full h-full rounded-full border-4 border-gray-200 dark:border-gray-300 overflow-hidden bg-gray-100 dark:bg-gray-200">
                                             <img v-if="profilePreview" :src="profilePreview" alt="Profile preview"
                                                 class="w-full h-full object-cover" />
                                             <div v-else class="flex items-center justify-center w-full h-full">
@@ -128,13 +150,11 @@ const submit = () => {
                                             </div>
                                         </div>
 
-                                        <!-- Remove button (NOT clipped) -->
                                         <button v-if="profilePreview" @click="removeImage" type="button"
                                             class="absolute -top-1 -right-1 z-20 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg transition-colors">
                                             <X class="h-4 w-4" />
                                         </button>
                                     </div>
-
 
                                     <!-- Upload Button -->
                                     <div class="w-full space-y-2">
@@ -230,44 +250,38 @@ const submit = () => {
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <!-- Credit Limit -->
                                     <div class="space-y-2">
-                                        <Label for="credit_limit"
-                                            class="text-sm font-medium text-gray-900 dark:text-gray-500">
+                                        <Label for="credit_limit" class="text-sm font-medium text-gray-900 dark:text-gray-500">
                                             Credit Limit
                                         </Label>
                                         <div class="relative">
-                                            <span
-                                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
                                                 ₱
                                             </span>
-                                            <Input v-model="form.credit_limit" type="number" id="credit_limit"
+                                            <Input v-model.number="form.credit_limit" type="number" id="credit_limit"
                                                 step="0.01" placeholder="0.00"
                                                 class="w-full pl-8 bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500 border-gray-300 dark:border-gray-600"
                                                 :class="{ 'border-red-500': form.errors.credit_limit }" />
                                         </div>
-                                        <p v-if="form.errors.credit_limit"
-                                            class="text-red-600 dark:text-red-400 text-sm">
+                                        <p v-if="form.errors.credit_limit" class="text-red-600 dark:text-red-400 text-sm">
                                             {{ form.errors.credit_limit }}
                                         </p>
                                     </div>
 
                                     <!-- Opening Balance -->
                                     <div class="space-y-2">
-                                        <Label for="opening_balance"
-                                            class="text-sm font-medium text-gray-900 dark:text-gray-500">
+                                        <Label for="opening_balance" class="text-sm font-medium text-gray-900 dark:text-gray-500">
                                             Opening Balance
                                         </Label>
                                         <div class="relative">
-                                            <span
-                                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
                                                 ₱
                                             </span>
-                                            <Input v-model="form.opening_balance" type="number" id="opening_balance"
+                                            <Input v-model.number="form.opening_balance" type="number" id="opening_balance"
                                                 step="0.01" placeholder="0.00"
                                                 class="w-full pl-8 bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500 border-gray-300 dark:border-gray-600"
                                                 :class="{ 'border-red-500': form.errors.opening_balance }" />
                                         </div>
-                                        <p v-if="form.errors.opening_balance"
-                                            class="text-red-600 dark:text-red-400 text-sm">
+                                        <p v-if="form.errors.opening_balance" class="text-red-600 dark:text-red-400 text-sm">
                                             {{ form.errors.opening_balance }}
                                         </p>
                                     </div>
@@ -292,7 +306,7 @@ const submit = () => {
                                     <Button type="submit" :disabled="form.processing"
                                         class="bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
                                         <Loader2 v-if="form.processing" class="h-4 w-4 animate-spin" />
-                                        <span>{{ form.processing ? 'Creating...' : 'Create Customer' }}</span>
+                                        <span>{{ form.processing ? 'Updating...' : 'Update Customer' }}</span>
                                     </Button>
                                 </div>
                             </div>

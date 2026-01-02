@@ -34,8 +34,8 @@ const mainNavItems: NavItem[] = [
         icon: BookUser,
     },
     {
-        title: 'Dashboard',
-        href: dashboard(),
+        title: 'Suppliers',
+        href: '/suppliers',
         icon: LayoutGrid,
     },
     {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Customer;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateRequest extends FormRequest
@@ -11,7 +12,7 @@ class UpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +23,17 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'string|max:255',
+            'phone' => 'string|max:20',
+            'email' => [
+                'sometimes',
+                'email',
+                Rule::unique('customers', 'email')->ignore($this->route('customer')),
+            ],
+            'address' => 'nullable|string',
+            'credit_limit' => 'nullable|numeric|min:0',
+            'opening_balance' => 'nullable|numeric',
+            'profile_image_id' => 'nullable|integer|exists:files,id',
         ];
     }
 }

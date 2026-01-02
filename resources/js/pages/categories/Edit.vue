@@ -8,7 +8,6 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 import { ArrowLeft, Loader2 } from 'lucide-vue-next';
 
-// Props: note that data is inside category.data
 const props = defineProps<{
   category: {
     data: {
@@ -16,7 +15,7 @@ const props = defineProps<{
       name: string;
       slug: string;
       description?: string;
-      is_active: number; 
+      is_active: number;
     }
   }
 }>();
@@ -40,7 +39,7 @@ const form = useForm<CategoryForm>({
   name: props.category.data.name,
   slug: props.category.data.slug,
   description: props.category.data.description || '',
-  is_active: props.category.data.is_active === 1, 
+  is_active: props.category.data.is_active === 1,
 });
 
 // Auto-generate slug from name
@@ -64,6 +63,7 @@ const submit = () => {
 </script>
 
 <template>
+
   <Head title="Edit Category" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
@@ -89,16 +89,10 @@ const submit = () => {
             <Label for="name" class="text-sm font-medium text-gray-900">
               Category Name <span class="text-red-500">*</span>
             </Label>
-            <Input
-              v-model="form.name"
-              @input="generateSlug"
-              type="text"
-              id="name"
+            <Input v-model="form.name" @input="generateSlug" type="text" id="name"
               placeholder="e.g., Electronics, Clothing, Home & Garden"
-              class="w-full"
-              :class="{ 'border-red-500': form.errors.name }"
-              required
-            />
+              class="w-full bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500 border-gray-300 dark:border-gray-600"
+              :class="{ 'border-red-500': form.errors.name }" required />
             <p v-if="form.errors.name" class="text-red-600 text-sm">{{ form.errors.name }}</p>
           </div>
 
@@ -107,14 +101,9 @@ const submit = () => {
             <Label for="slug" class="text-sm font-medium text-gray-900">
               Slug <span class="text-gray-400 text-xs">(Auto-generated)</span>
             </Label>
-            <Input
-              v-model="form.slug"
-              type="text"
-              id="slug"
-              placeholder="category-slug"
-              class="w-full font-mono text-sm"
-              :class="{ 'border-red-500': form.errors.slug }"
-            />
+            <Input v-model="form.slug" type="text" id="slug" placeholder="category-slug"
+              class="w-full bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500 border-gray-300 dark:border-gray-600"
+              :class="{ 'border-red-500': form.errors.slug }" />
             <p class="text-xs text-gray-500">
               URL-friendly version of the name. You can edit this if needed.
             </p>
@@ -124,14 +113,10 @@ const submit = () => {
           <!-- Description -->
           <div class="space-y-2">
             <Label for="description" class="text-sm font-medium text-gray-900">Description</Label>
-            <textarea
-              v-model="form.description"
-              id="description"
-              rows="4"
+            <textarea v-model="form.description" id="description" rows="4"
               class="w-full px-3 py-2 border dark:text-gray-500 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
               :class="{ 'border-red-500': form.errors.description }"
-              placeholder="Brief description of this category..."
-            ></textarea>
+              placeholder="Brief description of this category..."></textarea>
             <p v-if="form.errors.description" class="text-red-600 text-sm">{{ form.errors.description }}</p>
           </div>
 
@@ -140,21 +125,13 @@ const submit = () => {
             <Label class="text-sm font-medium text-gray-900">Status</Label>
             <div class="flex gap-4">
               <label class="flex items-center gap-2 cursor-pointer">
-                <input
-                  v-model="form.is_active"
-                  type="radio"
-                  :value="true"
-                  class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                />
+                <input v-model="form.is_active" type="radio" :value="true"
+                  class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
                 <span class="text-sm text-gray-700">Active</span>
               </label>
               <label class="flex items-center gap-2 cursor-pointer">
-                <input
-                  v-model="form.is_active"
-                  type="radio"
-                  :value="false"
-                  class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                />
+                <input v-model="form.is_active" type="radio" :value="false"
+                  class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
                 <span class="text-sm text-gray-700">Inactive</span>
               </label>
             </div>

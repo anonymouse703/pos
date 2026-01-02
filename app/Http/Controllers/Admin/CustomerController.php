@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use Exception;
 use Carbon\Carbon;
+use App\Models\File;
 use Inertia\Inertia;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Customer\StoreRequest;
 use App\Http\Requests\Customer\UpdateRequest;
 use App\Http\Resources\Admin\CustomerResource;
+use App\Services\FileUpload\FileUploadService;
 use App\Repositories\Contracts\CustomerRepositoryInterface;
 
 class CustomerController extends Controller
@@ -49,29 +53,52 @@ class CustomerController extends Controller
         return Inertia::render('customers/Create', []);
     }
 
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request, FileUploadService $fileUploadService)
     {
-        $payload = $request->validated();
-
-        $customer = new Customer();
-        $customer->forceFill($payload);
+        DB::beginTransaction();
 
         try {
-            $this->customerRepository->save($customer);
-        } catch (Exception $exception) {
-            report($exception);
-        }
+            $payload = $request->validated();
 
-        return redirect()
-            ->route('customers.index')
-            ->with('flash', [
-                'type' => 'success',
-                'message' => __('Category successfully created.'),
+            $customer = new Customer();
+            $customer->forceFill($payload);
+
+            $this->customerRepository->save($customer);
+
+            if ($request->hasFile('profile_image')) {
+                $file = $fileUploadService->upload(
+                    $request->file('profile_image'),
+                    Auth::user()?->id,
+                    'uploads/customers/profile-images'
+                );
+
+                $customer->profile_image_id = $file->id;
+                $customer->save();
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('customers.index')
+                ->with('flash', [
+                    'type' => 'success',
+                    'message' => __('Customer successfully created.'),
+                ]);
+
+        } catch (\Throwable $exception) {
+            DB::rollBack();
+            report($exception);
+
+            return back()->withErrors([
+                'error' => __('Something went wrong. Please try again.')
             ]);
+        }
     }
 
     public function edit(Customer $customer)
     {
+        $customer->load('profilePhoto');
+        
         return Inertia::render('customers/Edit', [
             'customer' => new CustomerResource($customer),
         ]);
@@ -90,10 +117,10 @@ class CustomerController extends Controller
         }
 
         return redirect()
-            ->route('categories.index')
+            ->route('customers.index')
             ->with('flash', [
                 'type' => 'success',
-                'message' => __('Category successfully updated.'),
+                'message' => __('Customer successfully updated.'),
             ]);
     }
 
@@ -106,10 +133,10 @@ class CustomerController extends Controller
         }
 
         return redirect()
-            ->route('categories.index')
+            ->route('customers.index')
             ->with('flash', [
                 'type' => 'danger',
-                'message' => __('Category successfully deleted.'),
+                'message' => __('Customer successfully deleted.'),
             ]);
     }
 

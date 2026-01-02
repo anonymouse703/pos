@@ -3,7 +3,6 @@ import Input from '@/components/ui/input/Input.vue';
 import Label from '@/components/ui/label/Label.vue';
 import Button from '@/components/ui/button/Button.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 import { ArrowLeft, Loader2 } from 'lucide-vue-next';
@@ -11,7 +10,7 @@ import { ArrowLeft, Loader2 } from 'lucide-vue-next';
 // Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Categories', href: '/categories' },
-    { title: 'Create', href: dashboard().url },
+    { title: 'Create', href: '/categories.create' },
 ];
 
 // Form typing
@@ -71,7 +70,7 @@ const submit = () => {
             </div>
 
             <!-- Form Card -->
-            <div class="bg-white rounded-lg border border-gray-200 shadow-sm w-full max-w-3xl mx-auto">
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm w-full max-w-5xl mx-auto">
                 <form @submit.prevent="submit" class="p-6 space-y-6">
                     <!-- Category Name -->
                     <div class="space-y-2">
@@ -79,7 +78,8 @@ const submit = () => {
                             Category Name <span class="text-red-500">*</span>
                         </Label>
                         <Input v-model="form.name" @input="generateSlug" type="text" id="name"
-                            placeholder="e.g., Electronics, Clothing, Home & Garden" class="w-full"
+                            placeholder="e.g., Electronics, Clothing, Home & Garden" 
+                            class="w-full bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500 border-gray-300 dark:border-gray-600"
                             :class="{ 'border-red-500': form.errors.name }" required />
                         <p v-if="form.errors.name" class="text-red-600 text-sm">{{ form.errors.name }}</p>
                     </div>
@@ -90,7 +90,8 @@ const submit = () => {
                             Slug <span class="text-gray-400 text-xs">(Auto-generated)</span>
                         </Label>
                         <Input v-model="form.slug" type="text" id="slug" placeholder="category-slug"
-                            class="w-full font-mono text-sm" :class="{ 'border-red-500': form.errors.slug }" />
+                            class="w-full bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500 border-gray-300 dark:border-gray-600" 
+                            :class="{ 'border-red-500': form.errors.slug }" />
                         <p class="text-xs text-gray-500">URL-friendly version of the name. You can edit this if needed.
                         </p>
                         <p v-if="form.errors.slug" class="text-red-600 text-sm">{{ form.errors.slug }}</p>
