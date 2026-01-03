@@ -7,22 +7,26 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Search, Filter, RefreshCcw } from 'lucide-vue-next';
-import CustomerActions from './partials/Action.vue';
+import ProductActions from './partials/Action.vue';
 
-interface Customer {
+interface Product {
   id: number;
+  sku: string;
+  barcode: string;
   name: string;
-  phone: string;
-  email: string;
-  address: string;
-  credit_limit: string;
-  opening_balance: string;
+  category_id: number;
+  category_name: string;
+  unit : string;
+  cost_price: string;
+  selling_price: string;
+  reorder_level: number;
+  is_active: boolean;
   created_at: string;
 }
 
 const props = defineProps<{
-  customers: {
-    data: Customer[];
+  products: {
+    data: Product[];
     meta?: {
       current_page: number;
       last_page: number;
@@ -34,18 +38,21 @@ const props = defineProps<{
 
 /* Breadcrumbs */
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Customers', href: '/customers' },
+  { title: 'Products', href: '/products' },
 ];
 
 /* Table columns */
 const columns = [
   { key: 'name', label: 'Name', width: '200px' },
-  { key: 'phone', label: 'Phone', width: '150px' },
-  { key: 'email', label: 'Email', width: '200px' },
-  { key: 'address', label: 'Address', width: '250px' },
-  { key: 'credit_limit', label: 'Credit Limit', width: '120px' },
-  { key: 'opening_balance', label: 'Opening Balance', width: '130px' },
-  { key: 'created_at', label: 'Created', width: '150px' },
+  { key: 'sku', label: 'SKU', width: '200px' },
+  { key: 'barcode', label: 'Barcode', width: '200px' },
+  { key: 'category_name', label: 'Category', width: '200px' },
+  { key: 'unit', label: 'Unit', width: '120px' },
+  { key: 'cost_price', label: 'Cost Price', width: '150px' },
+  { key: 'selling_price', label: 'Selling Price', width: '150px' },
+  { key: 'reorder_level', label: 'Reorder Level', width: '150px' },
+  { key: 'is_active', label: 'Status', width: '120px' },
+  { key: 'created_at', label: 'Created At', width: '150px' },
 ];
 
 /* Search & Filter */
@@ -57,9 +64,9 @@ const showFilterDropdown = ref(false);
 const hasDateFilter = computed(() => !!startDate.value || !!endDate.value);
 
 /* Fetch */
-const fetchCustomers = () => {
+const fetchProducts = () => {
   router.get(
-    '/customers',
+    '/products',
     {
       search: searchQuery.value,
       start_date: startDate.value,
@@ -74,24 +81,36 @@ const fetchCustomers = () => {
 const resetDateFilter = () => {
   startDate.value = '';
   endDate.value = '';
-  fetchCustomers();
+  fetchProducts();
 };
 
 /* Auto fetch when search cleared */
 watch(searchQuery, (value) => {
-  if (value === '') fetchCustomers();
+  if (value === '') fetchProducts();
 });
 
 /* Pagination */
 const paginationMeta = computed(() => ({
-  current_page: props.customers.meta?.current_page ?? 1,
-  last_page: props.customers.meta?.last_page ?? 1,
-  links: props.customers.meta?.links ?? [],
+  current_page: props.products.meta?.current_page ?? 1,
+  last_page: props.products.meta?.last_page ?? 1,
+  links: props.products.meta?.links ?? [],
 }));
+
+const formatCurrency = (value: number | string | undefined) => {
+    if (!value) return '0.00';
+    return new Intl.NumberFormat('en-PH', {
+        style: 'currency',
+        currency: 'PHP',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+        useGrouping: true, 
+    }).format(Number(value));
+};
+
 </script>
 
 <template>
-  <Head title="Customers" />
+  <Head title="Products" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex flex-col gap-4 p-4">
@@ -99,13 +118,13 @@ const paginationMeta = computed(() => ({
       <!-- Header -->
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-2xl font-bold">Customers</h1>
-          <p class="text-sm text-gray-500">Manage your customers</p>
+          <h1 class="text-2xl font-bold">Products</h1>
+          <p class="text-sm text-gray-500">Manage your products</p>
         </div>
 
-        <Link href="/customers/create">
+        <Link href="/products/create">
           <Button class="bg-blue-600 hover:bg-blue-500 text-white">
-            Create Customer
+            Create Product
           </Button>
         </Link>
       </div>
@@ -118,8 +137,8 @@ const paginationMeta = computed(() => ({
           <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             v-model="searchQuery"
-            @keyup.enter="fetchCustomers"
-            placeholder="Search customers..."
+            @keyup.enter="fetchProducts"
+            placeholder="Search products..."
             class="w-full pl-10 pr-4 py-2 border rounded-lg"
           />
         </div>
@@ -146,7 +165,7 @@ const paginationMeta = computed(() => ({
 
             <div class="flex gap-2">
               <button
-                @click="fetchCustomers"
+                @click="fetchProducts"
                 class="flex-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg py-2"
               >
                 Apply
@@ -165,19 +184,40 @@ const paginationMeta = computed(() => ({
       </div>
 
       <!-- DataTable -->
-      <DataTable :columns="columns" :data="props.customers.data">
+      <DataTable :columns="columns" :data="props.products.data">
         <template #row-actions="{ item }">
-          <CustomerActions :item="item" />
+          <ProductActions :item="item" />
+        </template>
+
+        <template #cell-category_name="{ item }">
+          {{ (item.category.name) ?? 'Uncategorized' }}
         </template>
 
         <template #cell-created_at="{ item }">
           {{ new Date(item.created_at).toLocaleDateString() }}
         </template>
 
+         <template #cell-cost_price="{ item }">
+          {{ formatCurrency(item.cost_price) }}
+        </template>
+
+         <template #cell-selling_price="{ item }">
+          {{ formatCurrency(item.selling_price) }}
+        </template>
+
+         <template #cell-is_active="{ item }">
+          <span
+            class="px-2 py-1 rounded text-xs"
+            :class="item.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+          >
+            {{ item.is_active ? 'Active' : 'Inactive' }}
+          </span>
+        </template>
+
         <template #footer>
           <div class="flex justify-between w-full">
             <p class="text-sm">
-              Showing {{ props.customers.data.length }} of {{ props.customers.meta?.total ?? 0 }}
+              Showing {{ props.products.data.length }} of {{ props.products.meta?.total ?? 0 }}
             </p>
             <Pagination :meta="paginationMeta" />
           </div>

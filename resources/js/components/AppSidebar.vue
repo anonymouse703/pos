@@ -11,10 +11,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+// import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, BookUser, ChartBarStacked } from 'lucide-vue-next';
+import { LayoutGrid, BookUser, ChartBarStacked, ShoppingCart, ShoppingBasketIcon  } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -39,10 +39,15 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
+        title: 'Products',
+        href: '/products',
+        icon: ShoppingCart,
     },
+    {
+        title: 'Purchases',
+        href: '/purchases',
+        icon: ShoppingBasketIcon,
+    }
 ];
 
 const footerNavItems: NavItem[] = [
@@ -65,7 +70,7 @@ const footerNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link href="/dashboard">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>

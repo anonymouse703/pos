@@ -8,13 +8,13 @@ import {
   Trash2,
 } from 'lucide-vue-next';
 
-interface Category {
+interface Supplier {
   id: number;
   is_active: boolean;
   name?: string;
 }
 
-const props = defineProps<{ item: Category }>();
+const props = defineProps<{ item: Supplier }>();
 
 /* Dropdown */
 const open = ref(false);

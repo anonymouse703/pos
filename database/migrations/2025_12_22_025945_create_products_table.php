@@ -17,7 +17,18 @@ return new class extends Migration
             $table->string('barcode')->nullable()->index();
             $table->string('name')->index();
             $table->foreignId('category_id')->constrained();
-            $table->foreignId('supplier_id')->nullable()->constrained();
+            $table->enum('unit', [
+                    'pc',
+                    'kilogram',
+                    'bag',
+                    'liter',
+                    'box',
+                    'roll',
+                    'sheet',
+                    'pack',
+                    'tube',
+                    'set',
+                ])->default('pc');
             $table->decimal('cost_price', 12, 2);
             $table->decimal('selling_price', 12, 2);
             $table->integer('reorder_level')->default(0);

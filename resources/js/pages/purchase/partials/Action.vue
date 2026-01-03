@@ -6,15 +6,17 @@ import {
   MoreVertical,
   Edit,
   Trash2,
+  CheckCircle,
+  XCircle,
 } from 'lucide-vue-next';
 
-interface Customer {
+interface Product {
   id: number;
   is_active: boolean;
   name?: string;
 }
 
-const props = defineProps<{ item: Customer }>();
+const props = defineProps<{ item: Product }>();
 
 /* Dropdown */
 const open = ref(false);
@@ -24,6 +26,9 @@ const position = ref({ top: 0, left: 0 });
 /* Delete modal */
 const showDeleteModal = ref(false);
 
+/* Activate/Deactivate modal */
+const showToggleModal = ref(false);
+const toggleAction = ref<'activate' | 'deactivate' | null>(null);
 
 /* Dropdown position calculation */
 const openMenu = async () => {
@@ -40,12 +45,26 @@ const openMenu = async () => {
 };
 
 /* Actions */
-const edit = () => router.visit(`/customers/${props.item.id}/edit`);
+const edit = () => router.visit(`/purchase/${props.item.id}/edit`);
 
+/* Open toggle modal */
+const openToggleModal = () => {
+  toggleAction.value = props.item.is_active ? 'deactivate' : 'activate';
+  showToggleModal.value = true;
+};
+
+/* Confirm toggle status */
+const confirmToggleStatus = () => {
+  router.put(`/purchase/${props.item.id}/toggle-status`, {}, {
+    onSuccess: () => {
+      showToggleModal.value = false;
+    }
+  });
+};
 
 /* Confirm delete */
 const confirmDelete = () => {
-  router.delete(`/customers/${props.item.id}`);
+  router.delete(`/products/${props.item.id}`);
   showDeleteModal.value = false;
 };
 
@@ -89,6 +108,17 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
         Edit
       </button>
 
+      <!-- Activate / Deactivate -->
+      <button
+        @click="openToggleModal"
+        class="flex w-full items-center gap-2 px-4 py-2 text-sm
+               hover:bg-gray-100 dark:hover:bg-gray-800"
+        :class="props.item.is_active ? 'text-yellow-600' : 'text-green-600'"
+      >
+        <component :is="props.item.is_active ? XCircle : CheckCircle" class="h-4 w-4" />
+        {{ props.item.is_active ? 'Deactivate' : 'Activate' }}
+      </button>
+
       <!-- Delete -->
       <button
         @click="showDeleteModal = true"
@@ -112,4 +142,14 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
     @cancel="showDeleteModal = false"
   />
 
+  <!-- Activate/Deactivate Modal -->
+  <Modal
+    :show="showToggleModal"
+    :title="toggleAction === 'activate' ? 'Activate Category' : 'Deactivate Category'"
+    :message="`Are you sure you want to ${toggleAction} ${props.item.name ?? 'this category'}?`"
+    confirmText="Yes"
+    cancelText="Cancel"
+    @confirm="confirmToggleStatus"
+    @cancel="showToggleModal = false"
+  />
 </template>

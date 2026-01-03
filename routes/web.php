@@ -25,7 +25,16 @@ Route::middleware('auth', 'verified')->group(function () {
     });
 
     Route::resource('customers', Admin\CustomerController::class);
+
     Route::resource('suppliers', Admin\SupplierController::class);
+
+    Route::resource('products', Admin\ProductController::class);
+    Route::controller(Admin\ProductController::class)->group(function () {
+        Route::put('products/{product}/toggle-status', 'toggleStatus')
+            ->name('products.toggle-status');
+
+    Route::resource('purchases', Admin\PurchaseController::class);
+    });
 });
 
 require __DIR__.'/settings.php';

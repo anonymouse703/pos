@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Traits\GeneratesSku;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
-    use HasUuids;
-
+    use GeneratesSku;
+    
     protected $fillable = [
-        'uuid', 
         'sku',
         'barcode', 
         'name',
@@ -19,18 +20,32 @@ class Product extends Model
         'cost_price',
         'selling_price',
         'reorder_level', 
-        'is_active'
+        'is_active',
+        'product_image_id',
     ];
 
-    public function category() {
+    public function category() : BelongsTo
+    {
         return $this->belongsTo(Category::class);
     }
 
-    public function supplier() {
+    public function purchaseItems() : HasMany
+    {
+        return $this->hasMany(PurchaseItem::class);
+    }
+
+    public function supplier() : BelongsTo
+    {
         return $this->belongsTo(Supplier::class);
     }
 
-    public function batches() {
+    public function batches() : HasMany
+    {
         return $this->hasMany(ProductBatch::class);
+    }
+
+    public function productPhoto() : BelongsTo   
+    {
+        return $this->belongsTo(File::class, 'product_image_id');
     }
 }
