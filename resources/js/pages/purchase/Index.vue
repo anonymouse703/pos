@@ -11,21 +11,15 @@ import ProductActions from './partials/Action.vue';
 
 interface Product {
   id: number;
-  sku: string;
-  barcode: string;
-  name: string;
-  category_id: number;
-  category_name: string;
-  unit : string;
-  cost_price: string;
-  selling_price: string;
-  reorder_level: number;
-  is_active: boolean;
-  created_at: string;
+  supplier: string;
+  invoice_number: string;
+  purchase_date: string;
+  total: number;
+  status: string;
 }
 
 const props = defineProps<{
-  products: {
+  purchases: {
     data: Product[];
     meta?: {
       current_page: number;
@@ -38,21 +32,16 @@ const props = defineProps<{
 
 /* Breadcrumbs */
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Products', href: '/products' },
+  { title: 'Purchases', href: '/purchases' },
 ];
 
 /* Table columns */
 const columns = [
-  { key: 'name', label: 'Name', width: '200px' },
-  { key: 'sku', label: 'SKU', width: '200px' },
-  { key: 'barcode', label: 'Barcode', width: '200px' },
-  { key: 'category_name', label: 'Category', width: '200px' },
-  { key: 'unit', label: 'Unit', width: '120px' },
-  { key: 'cost_price', label: 'Cost Price', width: '150px' },
-  { key: 'selling_price', label: 'Selling Price', width: '150px' },
-  { key: 'reorder_level', label: 'Reorder Level', width: '150px' },
-  { key: 'is_active', label: 'Status', width: '120px' },
-  { key: 'created_at', label: 'Created At', width: '150px' },
+  { key: 'supplier', label: 'Supplier', width: '300px' },
+  { key: 'invoice_number', label: 'Invoice Number', width: '200px' },
+  { key: 'purchase_date', label: 'Purchase Date', width: '200px' },
+  { key: 'total', label: 'Total Amount', width: '200px' },
+  { key: 'status', label: 'Status', width: '100px' },
 ];
 
 /* Search & Filter */
@@ -64,9 +53,9 @@ const showFilterDropdown = ref(false);
 const hasDateFilter = computed(() => !!startDate.value || !!endDate.value);
 
 /* Fetch */
-const fetchProducts = () => {
+const fetchPurchases = () => {
   router.get(
-    '/products',
+    '/purchases',
     {
       search: searchQuery.value,
       start_date: startDate.value,
@@ -81,19 +70,19 @@ const fetchProducts = () => {
 const resetDateFilter = () => {
   startDate.value = '';
   endDate.value = '';
-  fetchProducts();
+  fetchPurchases();
 };
 
 /* Auto fetch when search cleared */
 watch(searchQuery, (value) => {
-  if (value === '') fetchProducts();
+  if (value === '') fetchPurchases();
 });
 
 /* Pagination */
 const paginationMeta = computed(() => ({
-  current_page: props.products.meta?.current_page ?? 1,
-  last_page: props.products.meta?.last_page ?? 1,
-  links: props.products.meta?.links ?? [],
+  current_page: props.purchases.meta?.current_page ?? 1,
+  last_page: props.purchases.meta?.last_page ?? 1,
+  links: props.purchases.meta?.links ?? [],
 }));
 
 const formatCurrency = (value: number | string | undefined) => {
@@ -110,7 +99,7 @@ const formatCurrency = (value: number | string | undefined) => {
 </script>
 
 <template>
-  <Head title="Products" />
+  <Head title="Purchases" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex flex-col gap-4 p-4">
@@ -118,13 +107,13 @@ const formatCurrency = (value: number | string | undefined) => {
       <!-- Header -->
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-2xl font-bold">Products</h1>
-          <p class="text-sm text-gray-500">Manage your products</p>
+          <h1 class="text-2xl font-bold">Purchases</h1>
+          <p class="text-sm text-gray-500">Manage your purchases</p>
         </div>
 
-        <Link href="/products/create">
+        <Link href="/purchases/create">
           <Button class="bg-blue-600 hover:bg-blue-500 text-white">
-            Create Product
+            Create Purchase
           </Button>
         </Link>
       </div>
@@ -137,8 +126,8 @@ const formatCurrency = (value: number | string | undefined) => {
           <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             v-model="searchQuery"
-            @keyup.enter="fetchProducts"
-            placeholder="Search products..."
+            @keyup.enter="fetchPurchases"
+            placeholder="Search purchases..."
             class="w-full pl-10 pr-4 py-2 border rounded-lg"
           />
         </div>
@@ -165,7 +154,7 @@ const formatCurrency = (value: number | string | undefined) => {
 
             <div class="flex gap-2">
               <button
-                @click="fetchProducts"
+                @click="fetchPurchases"
                 class="flex-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg py-2"
               >
                 Apply
@@ -184,40 +173,27 @@ const formatCurrency = (value: number | string | undefined) => {
       </div>
 
       <!-- DataTable -->
-      <DataTable :columns="columns" :data="props.products.data">
+      <DataTable :columns="columns" :data="props.purchases.data">
         <template #row-actions="{ item }">
           <ProductActions :item="item" />
         </template>
 
-        <template #cell-category_name="{ item }">
-          {{ (item.category.name) ?? 'Uncategorized' }}
+        <template #cell-supplier="{ item }">
+          {{ (item.supplier.name) ?? 'No Supplier' }}
         </template>
 
-        <template #cell-created_at="{ item }">
-          {{ new Date(item.created_at).toLocaleDateString() }}
+        <template #cell-purchase_date="{ item }">
+          {{ new Date(item.purchase_date).toLocaleDateString() }}
         </template>
 
-         <template #cell-cost_price="{ item }">
-          {{ formatCurrency(item.cost_price) }}
-        </template>
-
-         <template #cell-selling_price="{ item }">
-          {{ formatCurrency(item.selling_price) }}
-        </template>
-
-         <template #cell-is_active="{ item }">
-          <span
-            class="px-2 py-1 rounded text-xs"
-            :class="item.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
-          >
-            {{ item.is_active ? 'Active' : 'Inactive' }}
-          </span>
+         <template #cell-total="{ item }">
+          {{ formatCurrency(item.total) }}
         </template>
 
         <template #footer>
           <div class="flex justify-between w-full">
             <p class="text-sm">
-              Showing {{ props.products.data.length }} of {{ props.products.meta?.total ?? 0 }}
+              Showing {{ props.purchases.data.length }} of {{ props.purchases.meta?.total ?? 0 }}
             </p>
             <Pagination :meta="paginationMeta" />
           </div>

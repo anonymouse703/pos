@@ -4,10 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use Carbon\Carbon;
 use Inertia\Inertia;
+use App\Models\Product;
+use App\Models\Supplier;
+use Faker\Provider\Payment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Admin\PurchaseResource;
+use App\Enums\Purchase\PaymentMethod;
+use App\Enums\Purchase\Status;
 use App\Repositories\PurchaseItemRepository;
+use App\Http\Resources\Admin\PurchaseResource;
 use App\Repositories\Contracts\PurchaseRepositoryInterface;
 
 class PurchaseController extends Controller
@@ -44,17 +49,24 @@ class PurchaseController extends Controller
         ]);
     }
 
-    // public function create()
-    // {
-    //     $categories = Category::select('id', 'name')
-    //         ->orderBy('name', 'asc')
-    //         ->get();
+    public function create()
+    {
+        $suppliers = Supplier::select('id', 'name')
+            ->orderBy('name', 'asc')
+            ->get();
+        
+        $products = Product::select('id', 'name')
+            ->orderBy('name', 'asc')
+            ->get();
             
-    //     return Inertia::render('products/Create', [
-    //         'categories' => $categories,
-    //         'units' => Unit::collection(),
-    //     ]);
-    // }
+        return Inertia::render('purchase/Create', [
+            'suppliers' => $suppliers,
+            'products' => $products,
+            'payment_methods' => PaymentMethod::collection(),
+            'payment_statuses' => Status::collection(),
+            
+        ]);
+    }
 
     // public function store(StoreRequest $request, FileUploadService $fileUploadService)
     // {

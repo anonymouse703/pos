@@ -39,7 +39,7 @@ const props = defineProps<{
     }[];
     units: {
         key: string;
-        value: string;
+        label: string;
     }[];
 }>();
 
@@ -243,16 +243,16 @@ const submit = () => {
                                         </p>
                                     </div>
                                     <div class="md:col-span-2 space-y-2">
-                                        <Label for="category"
+                                        <Label for="unit"
                                             class="text-sm font-medium text-gray-900 dark:text-gray-500">
                                             Unit <span class="text-red-500">*</span>
                                         </Label>
-                                        <select v-model="form.unit" id="category"
+                                        <select v-model="form.unit" id="unit"
                                             class="w-full bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2"
                                             :class="{ 'border-red-500': form.errors.unit }" required>
                                             <option value="" disabled>Select Unit</option>
                                             <option v-for="unit in units" :key="unit.key" :value="unit.key">
-                                                {{ unit.key }}
+                                                {{ unit.label }}
                                             </option>
                                         </select>
                                         <p v-if="form.errors.unit" class="text-red-600 dark:text-red-400 text-sm">
