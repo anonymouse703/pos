@@ -12,10 +12,10 @@ import ProductActions from './partials/Action.vue';
 interface Product {
   id: number;
   supplier: string;
-  invoice_number: string;
+  invoice_no: string;
   purchase_date: string;
   total: number;
-  status: string;
+  payment_status: string;
 }
 
 const props = defineProps<{
@@ -30,6 +30,8 @@ const props = defineProps<{
   };
 }>();
 
+console.log(props.purchases);
+
 /* Breadcrumbs */
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Purchases', href: '/purchases' },
@@ -38,10 +40,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 /* Table columns */
 const columns = [
   { key: 'supplier', label: 'Supplier', width: '300px' },
-  { key: 'invoice_number', label: 'Invoice Number', width: '200px' },
+  { key: 'invoice_no', label: 'Invoice Number', width: '200px' },
   { key: 'purchase_date', label: 'Purchase Date', width: '200px' },
   { key: 'total', label: 'Total Amount', width: '200px' },
-  { key: 'status', label: 'Status', width: '100px' },
+  { key: 'payment_status', label: 'Payment Status', width: '100px' },
 ];
 
 /* Search & Filter */

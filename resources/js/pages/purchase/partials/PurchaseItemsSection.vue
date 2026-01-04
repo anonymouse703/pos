@@ -9,6 +9,7 @@ import { Plus, Trash2 } from 'lucide-vue-next';
 export interface PurchaseItem {
     product_id: number;
     quantity: number;
+    cost_price: number;
     unit_cost: number;
     discount: number;
     tax_rate: number;
@@ -43,10 +44,16 @@ const removeItem = (index: number) => {
 
 // Calculate item total
 const calculateItemTotal = (item: PurchaseItem) => {
-    const subtotal = item.quantity * item.unit_cost;
-    const afterDiscount = subtotal - item.discount;
-    item.tax_amount = (afterDiscount * item.tax_rate) / 100;
-    item.total = afterDiscount + item.tax_amount;
+    // Ensure all values are numbers
+    const quantity = Number(item.quantity) || 0;
+    const unitCost = Number(item.unit_cost) || 0;
+    const discount = Number(item.discount) || 0;
+    const taxRate = Number(item.tax_rate) || 0;
+    
+    const subtotal = quantity * unitCost;
+    const afterDiscount = subtotal - discount;
+    item.tax_amount = Number(((afterDiscount * taxRate) / 100).toFixed(2));
+    item.total = Number((afterDiscount + item.tax_amount).toFixed(2));
 };
 
 // Watch for changes in items
@@ -76,11 +83,11 @@ watch(() => props.items, () => {
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Product -->
                     <div class="space-y-2 lg:col-span-2">
-                        <Label :for="`product_${index}`">Product *</Label>
+                        <Label :for="`product_${index}`" class="text-sm font-medium text-gray-900 dark:text-gray-500">Product *</Label>
                         <select 
                             :id="`product_${index}`"
                             v-model="item.product_id"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2"
                             required
                         >
                             <option :value="0" disabled>Select Product</option>
@@ -92,7 +99,7 @@ watch(() => props.items, () => {
 
                     <!-- Quantity -->
                     <div class="space-y-2">
-                        <Label :for="`quantity_${index}`">Quantity *</Label>
+                        <Label :for="`quantity_${index}`" class="text-sm font-medium text-gray-900 dark:text-gray-500">Quantity *</Label>
                         <Input 
                             :id="`quantity_${index}`"
                             v-model.number="item.quantity"
@@ -100,12 +107,27 @@ watch(() => props.items, () => {
                             min="1"
                             step="1"
                             required
+                            class="w-full px-4 py-2 rounded border bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500"
+                        />
+                    </div>
+
+                    <!-- Cost Price -->
+                    <div class="space-y-2">
+                        <Label :for="`cost_price_${index}`" class="text-sm font-medium text-gray-900 dark:text-gray-500">Cost Price *</Label>
+                        <Input 
+                            :id="`cost_price_${index}`"
+                            v-model.number="item.cost_price"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            required
+                            class="w-full px-4 py-2 rounded border bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500"
                         />
                     </div>
 
                     <!-- Unit Cost -->
                     <div class="space-y-2">
-                        <Label :for="`unit_cost_${index}`">Unit Cost *</Label>
+                        <Label :for="`unit_cost_${index}`" class="text-sm font-medium text-gray-900 dark:text-gray-500">Unit Cost *</Label>
                         <Input 
                             :id="`unit_cost_${index}`"
                             v-model.number="item.unit_cost"
@@ -113,50 +135,55 @@ watch(() => props.items, () => {
                             min="0"
                             step="0.01"
                             required
+                            class="w-full px-4 py-2 rounded border bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500"
                         />
                     </div>
 
                     <!-- Discount -->
                     <div class="space-y-2">
-                        <Label :for="`discount_${index}`">Discount</Label>
+                        <Label :for="`discount_${index}`" class="text-sm font-medium text-gray-900 dark:text-gray-500">Discount</Label>
                         <Input 
                             :id="`discount_${index}`"
                             v-model.number="item.discount"
                             type="number"
                             min="0"
                             step="0.01"
+                            class="w-full px-4 py-2 rounded border bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500"
                         />
                     </div>
 
                     <!-- Tax Rate -->
                     <div class="space-y-2">
-                        <Label :for="`tax_rate_${index}`">Tax Rate (%)</Label>
+                        <Label :for="`tax_rate_${index}`" class="text-sm font-medium text-gray-900 dark:text-gray-500">Tax Rate (%)</Label>
                         <Input 
                             :id="`tax_rate_${index}`"
                             v-model.number="item.tax_rate"
                             type="number"
                             min="0"
                             step="0.01"
+                            class="w-full px-4 py-2 rounded border bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500"
                         />
                     </div>
 
                     <!-- Batch Number -->
                     <div class="space-y-2">
-                        <Label :for="`batch_${index}`">Batch Number</Label>
+                        <Label :for="`batch_${index}`" class="text-sm font-medium text-gray-900 dark:text-gray-500">Batch Number</Label>
                         <Input 
                             :id="`batch_${index}`"
                             v-model="item.batch_number"
                             type="text"
+                            class="w-full px-4 py-2 rounded border bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500"
                         />
                     </div>
 
                     <!-- Expiry Date -->
                     <div class="space-y-2">
-                        <Label :for="`expiry_${index}`">Expiry Date</Label>
+                        <Label :for="`expiry_${index}`" class="text-sm font-medium text-gray-900 dark:text-gray-500">Expiry Date</Label>
                         <Input 
                             :id="`expiry_${index}`"
                             v-model="item.expiry_date"
                             type="date"
+                            class="w-full px-4 py-2 rounded border bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500"
                         />
                     </div>
                 </div>

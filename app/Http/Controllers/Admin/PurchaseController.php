@@ -8,9 +8,11 @@ use App\Models\Product;
 use App\Models\Supplier;
 use Faker\Provider\Payment;
 use Illuminate\Http\Request;
+use App\Enums\Purchase\Status;
 use App\Http\Controllers\Controller;
 use App\Enums\Purchase\PaymentMethod;
-use App\Enums\Purchase\Status;
+use App\Services\Purchase\PurchaseService;
+use App\Http\Requests\Purchase\StoreRequest;
 use App\Repositories\PurchaseItemRepository;
 use App\Http\Resources\Admin\PurchaseResource;
 use App\Repositories\Contracts\PurchaseRepositoryInterface;
@@ -68,47 +70,25 @@ class PurchaseController extends Controller
         ]);
     }
 
-    // public function store(StoreRequest $request, FileUploadService $fileUploadService)
-    // {
-    //     DB::beginTransaction();
+    public function store(StoreRequest $request, PurchaseService $service)
+    {
+        $service->store($request->validated());
 
-    //     try {
-    //         $payload = $request->validated();
+        return redirect()
+            ->route('purchases.index')
+            ->with('success', 'Purchase created successfully');
+    }
 
-    //         $product = new Product();
-    //         $product->forceFill($payload);
+    public function show($id)
+    {
+        $purchase = $this->purchaseRepository
+            ->with(['supplier', 'items.product'])
+            ->find($id);
 
-    //         $this->purchaseRepository->save($product);
-
-    //         if ($request->hasFile('product_photo')) {
-    //             $file = $fileUploadService->upload(
-    //                 $request->file('product_photo'),
-    //                 Auth::user()?->id,
-    //                 'uploads/products/product-images'
-    //             );
-
-    //             $product->product_image_id = $file->id;
-    //             $product->save();
-    //         }
-
-    //         DB::commit();
-
-    //         return redirect()
-    //             ->route('products.index')
-    //             ->with('flash', [
-    //                 'type' => 'success',
-    //                 'message' => __('Product successfully created.'),
-    //             ]);
-
-    //     } catch (\Throwable $exception) {
-    //         DB::rollBack();
-    //         report($exception);
-
-    //         return back()->withErrors([
-    //             'error' => __('Something went wrong. Please try again.')
-    //         ]);
-    //     }
-    // }
+        return Inertia::render('purchase/Show', [
+            'purchase' => $purchase,
+        ]);
+    }
 
     // public function edit(Product $product)
     // {

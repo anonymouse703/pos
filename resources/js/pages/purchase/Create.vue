@@ -44,7 +44,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 // Form typing
 interface PurchaseForm {
     supplier_id: number;
-    invoice_number: string;
+    invoice_no: string;
     purchase_date: string;
     due_date: string;
     subtotal: number;
@@ -64,7 +64,7 @@ interface PurchaseForm {
 // Use Inertia form with typing
 const form = useForm<PurchaseForm>({
     supplier_id: 0,
-    invoice_number: '',
+    invoice_no: '',
     purchase_date: new Date().toISOString().split('T')[0],
     due_date: '',
     subtotal: 0,
@@ -86,6 +86,7 @@ const addItem = () => {
     form.items.push({
         product_id: 0,
         quantity: 1,
+        cost_price: 0,
         unit_cost: 0,
         discount: 0,
         tax_rate: 0,
@@ -105,24 +106,24 @@ const removeItem = (index: number) => {
 // Calculate purchase totals
 const calculateTotals = () => {
     // Calculate subtotal from all items
-    form.subtotal = form.items.reduce((sum, item) => {
+    form.subtotal = Number(form.items.reduce((sum, item) => {
         return sum + (item.quantity * item.unit_cost);
-    }, 0);
+    }, 0));
 
     // Calculate total tax from items
-    const itemsTax = form.items.reduce((sum, item) => sum + item.tax_amount, 0);
+    const itemsTax = Number(form.items.reduce((sum, item) => sum + Number(item.tax_amount), 0));
 
     // Calculate total discount from items
-    const itemsDiscount = form.items.reduce((sum, item) => sum + item.discount, 0);
+    const itemsDiscount = Number(form.items.reduce((sum, item) => sum + Number(item.discount), 0));
 
     form.tax = itemsTax;
     form.discount = itemsDiscount;
 
     // Calculate final total
-    form.total = form.subtotal - form.discount + form.tax + form.shipping;
+    form.total = Number(form.subtotal - form.discount + form.tax + form.shipping);
 
     // Calculate balance
-    form.balance = form.total - form.amount_paid;
+    form.balance = Number(form.total - form.amount_paid);
 };
 
 // Handle items update from child component
@@ -132,6 +133,8 @@ const handleItemsUpdate = () => {
 
 // Watch for changes in shipping and amount paid
 watch([() => form.shipping, () => form.amount_paid], () => {
+    form.shipping = Number(form.shipping) || 0;
+    form.amount_paid = Number(form.amount_paid) || 0;
     calculateTotals();
 });
 
@@ -150,7 +153,6 @@ const submit = () => {
 </script>
 
 <template>
-
     <Head title="Create Purchase" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -186,14 +188,14 @@ const submit = () => {
 
                             <!-- Invoice Number -->
                             <div class="space-y-2">
-                                <Label for="invoice_number"
+                                <Label for="invoice_no"
                                     class="text-sm font-medium text-gray-900 dark:text-gray-500">Invoice Number
                                     *</Label>
-                                <Input id="invoice_number" v-model="form.invoice_number" type="text"
+                                <Input id="invoice_no" v-model="form.invoice_no" type="text"
                                     class="w-full px-4 py-2 rounded border bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500"
                                     placeholder="INV-001" required />
-                                <span v-if="form.errors.invoice_number" class="text-sm text-red-600">{{
-                                    form.errors.invoice_number }}</span>
+                                <span v-if="form.errors.invoice_no" class="text-sm text-red-600">{{
+                                    form.errors.invoice_no }}</span>
                             </div>
 
                             <!-- Supplier -->
@@ -203,14 +205,11 @@ const submit = () => {
                                 <select v-model="form.supplier_id" id="supplier_id"
                                     class="w-full bg-white dark:bg-gray-200 text-gray-900 dark:text-gray-500 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2"
                                     :class="{ 'border-red-500': form.errors.supplier_id }" required>
-                                    <option value="" disabled>Select Supplier</option>
+                                    <option :value="0" disabled>Select Supplier</option>
                                     <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">
                                         {{ supplier.name }}
                                     </option>
                                 </select>
-                                <p v-if="form.errors.supplier_id" class="text-red-600 dark:text-red-400 text-sm">
-                                    {{ form.errors.supplier_id }}
-                                </p>
                                 <span v-if="form.errors.supplier_id" class="text-sm text-red-600">{{
                                     form.errors.supplier_id }}</span>
                             </div>
@@ -237,9 +236,9 @@ const submit = () => {
                                         {{ payment_method.label  }}
                                     </option>
                                 </select>
-                                <p v-if="form.errors.payment_method" class="text-red-600 dark:text-red-400 text-sm">
+                                <span v-if="form.errors.payment_method" class="text-sm text-red-600">
                                     {{ form.errors.payment_method }}
-                                </p>
+                                </span>
                             </div>
 
                             <!-- Due Date -->
@@ -265,9 +264,9 @@ const submit = () => {
                                         {{ payment_status.label }}
                                     </option>
                                 </select>
-                                <p v-if="form.errors.status" class="text-red-600 dark:text-red-400 text-sm">
+                                <span v-if="form.errors.status" class="text-sm text-red-600">
                                     {{ form.errors.status }}
-                                </p>
+                                </span>
                             </div>
                         </div>
 
